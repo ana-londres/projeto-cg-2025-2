@@ -1,8 +1,5 @@
-/* 
-   implementacao dos tres modos de camera do Sistema Solar.
-   todos os angulos armazenados em graus; convertidos para
-   radianos so no momento do calculo de posicao/direcao
-*/
+//implementacao dos tres modos de camera do Sistema Solar
+//  -> todos os angulos armazenados em graus e convertidos para radianos so no momento do calculo de posicao/direcao
 
 #include "camera.h"
 #include "planets.h" 
@@ -15,6 +12,12 @@
 CameraState camStates[CAM_COUNT];
 CameraMode  cameraMode = CAM_OVERVIEW;
 
+// vars pra CAM_ORBIT
+int   orbitTarget    = -1; // indice do planeta alvo -> 1-8 ou -1 para nenhum
+float orbitWalkAngle = 0.0f; // angulo da caminhada na orbita, controlado pelo mouse
+float orbitViewDist  = 3.0f; // distancia radial da camera ao planeta, controlada por enterOrbit()
+float orbitViewPitch = 15.0f; // inclinacao vertical da camera, controlada por enterOrbit() e teclas Q/E
+
 void initCameraStates(void)
 {
     // visao geral-> acima e levemente afastado do sol 
@@ -23,13 +26,14 @@ void initCameraStates(void)
     // POV sol -> camera na origem, olhando para frente 
     camStates[CAM_SUN]      = (CameraState){  0.0f,  0.0f,  2.5f };
 
+    // POV orbita -> o usuario pode escolher qualquer planeta como alvo
+    camStates[CAM_ORBIT] = (CameraState){ 0.0f, 0.0f,  3.0f };
+
 }
 
-/* 
-   camera esferica ao redor da origem (Sol).
-   O usuario orbita livremente com mouse.
-   pitch: limitado entre 2 e 89 graus (nunca rasa nem invertida)
-*/
+// camera esferica ao redor da origem (Sol)
+//  -> o usuario orbita livremente com mouse
+//  -> pitch: limitado entre 2 e 89 graus (nunca rasa nem invertida)
 static const char *setupCameraOverview(void)
 {
     CameraState *cs = &camStates[CAM_OVERVIEW];
@@ -95,5 +99,47 @@ static const char *setupCameraSun(void)
 const char *setupCamera(void)
 {
     if (cameraMode == CAM_OVERVIEW) return setupCameraOverview();
+
+    // orbitTarget < 0 significa que nenhum planeta foi selecionado para o modo ORBIT, entao cai no POV Sol
+    if (cameraMode == CAM_ORBIT && orbitTarget >= 0) return setupCameraOrbit(); 
+
     return setupCameraSun();
+}
+
+// ativa o modo POV Sol, com a camera posicionada no centro do Sol olhando para fora
+void enterSunPOV(void)
+{
+    cameraMode = CAM_SUN;
+
+    // pre-orienta a camera para a Terra, calculando o ângulo de yaw a partir da posição atual da Terra
+    float ep[3];
+    getPlanetWorldPos(EARTH, ep);
+    camStates[CAM_SUN].yaw   = atan2f(ep[0], ep[2]) * 180.0f / PI;
+    camStates[CAM_SUN].pitch = 0.0f;
+    camStates[CAM_SUN].dist  = 2.5f;
+
+    printf("POV Sol\n");
+}
+
+// entra no modo ORBIT, pra poder transitar ao planeta especificado
+void enterOrbit(int planetIdx)
+{
+    extern int animate;
+
+    if (animate) {
+        printf("Pause a animacao (SPACE) antes de entrar no modo orbita\n");
+        return;
+    }
+
+    cameraMode = CAM_ORBIT;
+    orbitTarget = planetIdx;
+
+    // posiciona o observador no anel da orbita, alinhado com o planeta, na órbita de trás dele
+    orbitWalkAngle = planets[planetIdx].orbitAngle;
+
+    // distancia proporcional ao tamanho do planeta, para evitar que fique muito perto de planetas grandes/mt longe de planetas pequenos
+    orbitViewDist  = planets[planetIdx].size * 8.0f + 1.5f;
+
+    orbitViewPitch = 15.0f;
+    printf("Orbita de %s\n", planets[planetIdx].name);
 }
