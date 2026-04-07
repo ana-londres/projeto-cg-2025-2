@@ -58,6 +58,32 @@ static const char *setupCameraOverview(void)
     return "Visao Geral";
 }
 
+// camera orbitando um planeta selecionado
+static const char *setupCameraOrbit(void)
+{
+    Planet *p = &planets[orbitTarget];
+
+    // calcula a posicao atual do planeta para olhar em direcao a ele
+    float pAngleRad = p->orbitAngle * PI / 180.0f;
+    float px = p->orbitRadius * cosf(pAngleRad);
+    float pz = p->orbitRadius * sinf(pAngleRad);
+
+    // converte os angulos de caminhada e pitch para radianos
+    float walkRad  = orbitWalkAngle  * PI / 180.0f;
+    float pitchRad = orbitViewPitch  * PI / 180.0f;
+
+    float camR = p->orbitRadius + orbitViewDist * cosf(pitchRad);
+    float camY =                  orbitViewDist * sinf(pitchRad);
+
+    float ex = camR * cosf(walkRad);
+    float ey = camY;
+    float ez = camR * sinf(walkRad);
+
+    // olha para o planeta alvo
+    gluLookAt(ex, ey, ez,   px, 0.0f, pz,   0, 1, 0);
+    return "Orbita";
+}
+
 /*
    camera posicionada no centro do Sol, olhando para fora.
    permite ao usuario girar 360 graus e ver todos os planetas.
