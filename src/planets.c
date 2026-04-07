@@ -1,5 +1,6 @@
 #include "planets.h"
 #include "render_utils.h"
+#include "textures.h"
 
 #include <math.h>
 
@@ -11,9 +12,9 @@ Asteroid asteroids[NUM_ASTEROIDS];
 float moonOrbitAngle = 0.0f;
 float moonSelfAngle  = 0.0f;
 
-// Inicializa os parâmetros básicos de cada planeta, foram ajustados para deixar a visualização melhor na cena.
-// distância ao Sol na cena, tamanho da esfera, velocidade da órbita,
-// velocidade de rotação própria, posição inicial na órbita, rotação inicial, inclinação axial, cor base, textura ainda não ligada, nome
+// Inicializa os parâmetros básicos de cada planeta, foram ajustados para deixar a visualização melhor na cena:
+//distância ao Sol na cena, tamanho da esfera, velocidade da órbita,
+//velocidade de rotação própria, posição inicial na órbita, rotação inicial, inclinação axial, cor base, textura ainda não ligada, nome
 void initPlanets(void)
 {
     planets[MERCURY] = (Planet){ 3.5f,  0.22f, 2.00f, 1.8f,   0.0f, 0.0f,   2.0f, {0.65f, 0.65f, 0.65f}, 0, "Mercurio" };
@@ -37,20 +38,51 @@ void getPlanetWorldPos(int i, float pos[3])
     pos[2] = planets[i].orbitRadius * sinf(a);
 }
 
+//faz os anéis de Saturno como uma faixa circular texturizada. O blend é ativado para permitir a transparência da textura
+void drawSaturnRings(void)
+{
+    glEnable(GL_BLEND); //tem blend pq a textura do anel pode usar transparência
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // então permite misturar o anel com o fundo
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, saturnRingTexture); 
+
+    glDisable(GL_LIGHTING);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i <= 512; i++) {
+        float a = 2.0f * PI * i / 512.0f;
+        float ca = cosf(a);
+        float sa = sinf(a);
+        float v = (float)i / 512.0f;
+
+        glTexCoord2f(0.0f, v);
+        glVertex3f(SATURN_RING_INNER * ca, 0.0f, SATURN_RING_INNER * sa); //vértice da borda interna
+
+        glTexCoord2f(1.0f, v);
+        glVertex3f(SATURN_RING_OUTER * ca, 0.0f, SATURN_RING_OUTER * sa); //vértice da borda externa
+    }
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+}
+
 // Desenha um planeta aplicando a hierarquia básica das transformações:
-// primeiro ele gira na órbita, depois vai para sua distância ao Sol,
-// inclina o eixo e por fim gira em torno dele mesmo.
+//primeiro ele gira na órbita, depois vai para sua distância ao Sol, inclina o eixo e por fim gira em torno dele msm
 void drawPlanet(int i)
 {
     Planet *p = &planets[i];
 
-    drawOrbit(p->orbitRadius); //só desenha a “trilha” da órbita.
+    drawOrbit(p->orbitRadius); // só desenha a trilha da órbita
 
     glPushMatrix();
 
         // coloca o planeta na posição atual da órbita
-        glRotatef(p->orbitAngle, 0, 1, 0); //gira o sistema em torno do eixo Y
-        glTranslatef(p->orbitRadius, 0, 0); //afasta o planeta do Sol
+        glRotatef(p->orbitAngle, 0, 1, 0); // gira o sistema em torno do eixo Y
+        glTranslatef(p->orbitRadius, 0, 0); // afasta o planeta do Sol
 
         // inclinação do eixo e rotação própria
         glRotatef(p->tilt, 0, 0, 1);
@@ -59,5 +91,31 @@ void drawPlanet(int i)
         setMaterial(p->color[0], p->color[1], p->color[2], 60.0f);
         drawTexturedSphere(p->size, 36, 36, p->texture);
 
-    glPopMatrix(); //restaura a matriz original pro próximo planeta ser desenhado sem herdar a transformação do anterior
+        // a Lua é desenhada como filha da Terra
+        if (i == EARTH) {
+            glRotatef(-p->selfAngle, 0, 1, 0); //“zera” temporariamente a orientação própria da Terra
+            glRotatef(-p->tilt, 0, 0, 1); //aí aplica a órbita da Lua num plano mais controlado e ela não fica inclinada
+
+            glPushMatrix();
+                glRotatef(moonOrbitAngle, 0, 1, 0); //gira ao redor da Terra
+                glTranslatef(MOON_ORBIT_RADIUS, 0, 0); //afasta pela distância orbital
+                glRotatef(moonSelfAngle, 0, 1, 0); //gira sobre si mesma
+
+                setMaterial(0.70f, 0.70f, 0.70f, 20.0f);
+                drawTexturedSphere(0.12f, 24, 24, moonTexture); //esfera menor com textura própria
+            glPopMatrix();
+        }
+
+        // os anéis são desenhados só em Saturno
+        if (i == SATURN) {
+            glRotatef(-p->selfAngle, 0, 1, 0);
+            glRotatef(-p->tilt, 0, 0, 1); //evita que os anéis girem “junto com a casca” do planeta de um jeito estranho
+
+            glPushMatrix();
+                glRotatef(26.7f, 1, 0, 0); //reaplica uma inclinação controlada 
+                drawSaturnRings();
+            glPopMatrix();
+        }
+
+    glPopMatrix(); // restaura a matriz original pro próximo planeta ser desenhado sem herdar a transformação do anterior
 }
