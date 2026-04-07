@@ -76,7 +76,9 @@ void display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     const char *camName = setupCamera();
-
+    
+    drawStars(starsTexture);
+    
     // reposiciona a luz 0 na origem (Sol) apos setupCamera() 
     GLfloat lightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
