@@ -1,10 +1,10 @@
 #ifndef HUD_H
 #define HUD_H
 
-// desenha um texto 2D na tela
-void drawText(float x, float y, const char *text);
+//exibe informacoes de estado da simulacao sobre a cena 3D,
 
-// desenha o HUD completo (informações na tela)
-void drawHUD(int width, int height);
+extern int showLegend; // Flag global: 1 = mostrar HUD, 0 = ocultar (controlado pela tecla H) 
 
-#endif
+void drawHUD(int windowWidth, int windowHeight, const char *camName);
+
+#endif 
