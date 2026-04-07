@@ -473,7 +473,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);//  // double buffer evita flicker, RGB define cor, DEPTH ativa z-buffer
     glutInitWindowSize(1200, 800);
     glutInitWindowPosition(80, 40);
-    glutCreateWindow("Sistema Solar 3D - Computacao Grafica 2025");
+    glutCreateWindow("Sistema Solar 3D - Projeto Final ICG 2025.2");
 
     init(); // configura OpenGL e estados iniciais
 
