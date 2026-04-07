@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "camera.h"
 // variaveis de controle da simulacao - precisam ser globais -> porque varios callbacks do GLUT precisam acessar
 float animSpeed    = 1.0f;
 int   animate      = 1;
@@ -27,6 +28,7 @@ void init(void)
     glEnable(GL_LIGHTING);
     glEnable(GL_NORMALIZE);  // necessario quando usa glScalef com luzes 
     glShadeModel(GL_SMOOTH);
+    initCameraStates();
 }
 
 void display(void)
@@ -34,6 +36,7 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    const char *camName = setupCamera();
 
     glutSwapBuffers(); // double buffer -> troca os buffers pra nao piscar 
 }
