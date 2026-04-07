@@ -32,8 +32,7 @@ typedef struct {
     const char *name;
 } Planet;
 
-/* Estrutura reservada pro cinturão de asteroides.
-   Ela já fica definida aqui porque vai ser usada depois. */
+//estrutura pro cinturão de asteroides.
 typedef struct {
     float orbitRadius;
     float orbitAngle;
@@ -42,7 +41,7 @@ typedef struct {
     float y;
 } Asteroid;
 
-/* índices nomeados pro acesso no vetor planets[] */
+//índices nomeados pro acesso no vetor planets[] 
 typedef enum {
     MERCURY = 0,
     VENUS,
@@ -54,18 +53,16 @@ typedef enum {
     NEPTUNE
 } PlanetIndex;
 
-// Vetores globais definidos em planets.c
 extern Planet planets[NUM_PLANETS];
 extern Asteroid asteroids[NUM_ASTEROIDS];
 
-/* Ângulos da Lua, usados na animação */
+// Ângulos da Lua, usados na animação 
 extern float moonOrbitAngle;
 extern float moonSelfAngle;
 
-/* Inicializa os dados básicos dos planetas */
+// Inicializa os dados básicos dos planetas 
 void initPlanets(void);
 
-// Essas funções serão implementadas nas próximas etapas 
 void initAsteroids(void);
 void drawPlanet(int i);
 void drawAsteroids(void);
