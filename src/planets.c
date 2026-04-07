@@ -27,6 +27,21 @@ void initPlanets(void)
     planets[NEPTUNE] = (Planet){24.0f,  0.54f, 0.20f, 2.2f, 315.0f, 0.0f,  28.3f, {0.25f, 0.45f, 0.95f}, 0, "Netuno"   };
 }
 
+//gera os asteroides do cinturão com pequenas variações de raio, velocidade, tamanho e altura, tudo calculado a partir do índice
+void initAsteroids(void)
+{
+    for (int i = 0; i < NUM_ASTEROIDS; i++) {
+        float rv = ((i * 31) % 100) / 100.0f - 0.5f;
+        //valores pseudoaleatórios baseados no índice i, sem usar rand(). Pro resultado ficar smp igual em cada execução,
+        //entao o cinturao fica smp igual a cada execucao
+        asteroids[i].orbitRadius = ASTEROID_BELT_RADIUS + rv * ASTEROID_BELT_SPREAD; //distância ao centro do cinturão
+        asteroids[i].orbitAngle = (float)i / NUM_ASTEROIDS * 360.0f; //em que ponto do círculo ele começa
+        asteroids[i].orbitSpeed = 0.70f + ((i * 17) % 30) / 100.0f; //velocidade angular
+        asteroids[i].size = 0.04f + ((i * 13) % 10) / 200.0f; //tamanho previsto
+        asteroids[i].y = ((i * 7) % 20) / 100.0f - 0.1f; //altura pequena pro cinturão não ficar 100% chapado
+    }
+}
+
 // posição atual do planeta no plano XZ. Aqui usamos o ângulo orbital pra converter
 // movimento circular em coordenadas cartesianas com cosseno e seno.
 void getPlanetWorldPos(int i, float pos[3])
@@ -42,10 +57,10 @@ void getPlanetWorldPos(int i, float pos[3])
 void drawSaturnRings(void)
 {
     glEnable(GL_BLEND); //tem blend pq a textura do anel pode usar transparência
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // então permite misturar o anel com o fundo
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //então permite misturar o anel com o fundo
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, saturnRingTexture); 
+    glBindTexture(GL_TEXTURE_2D, saturnRingTexture);
 
     glDisable(GL_LIGHTING);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -58,10 +73,10 @@ void drawSaturnRings(void)
         float v = (float)i / 512.0f;
 
         glTexCoord2f(0.0f, v);
-        glVertex3f(SATURN_RING_INNER * ca, 0.0f, SATURN_RING_INNER * sa); //vértice da borda interna
+        glVertex3f(SATURN_RING_INNER * ca, 0.0f, SATURN_RING_INNER * sa); // vértice da borda interna
 
         glTexCoord2f(1.0f, v);
-        glVertex3f(SATURN_RING_OUTER * ca, 0.0f, SATURN_RING_OUTER * sa); //vértice da borda externa
+        glVertex3f(SATURN_RING_OUTER * ca, 0.0f, SATURN_RING_OUTER * sa); // vértice da borda externa
     }
     glEnd();
 
@@ -71,7 +86,7 @@ void drawSaturnRings(void)
 }
 
 // Desenha um planeta aplicando a hierarquia básica das transformações:
-//primeiro ele gira na órbita, depois vai para sua distância ao Sol, inclina o eixo e por fim gira em torno dele msm
+//primeiro ele gira na órbita, depois vai pra sua distância ao Sol, inclina o eixo e por fim gira em torno dele msm
 void drawPlanet(int i)
 {
     Planet *p = &planets[i];
@@ -112,10 +127,35 @@ void drawPlanet(int i)
             glRotatef(-p->tilt, 0, 0, 1); //evita que os anéis girem “junto com a casca” do planeta de um jeito estranho
 
             glPushMatrix();
-                glRotatef(26.7f, 1, 0, 0); //reaplica uma inclinação controlada 
+                glRotatef(26.7f, 1, 0, 0); //reaplica uma inclinação controlada
                 drawSaturnRings();
             glPopMatrix();
         }
 
     glPopMatrix(); // restaura a matriz original pro próximo planeta ser desenhado sem herdar a transformação do anterior
+}
+
+// Desenha os asteroides do cinturão como pontos. Usa GL_POINTS porque é bem mais leve do que desenhar uma esfera pra cada um.
+void drawAsteroids(void)
+{
+    glDisable(GL_LIGHTING);
+    glPointSize(2.5f);
+
+    glBegin(GL_POINTS); //cada asteroide vira um ponto
+    for (int i = 0; i < NUM_ASTEROIDS; i++) {
+        float a = asteroids[i].orbitAngle * PI / 180.0f;
+
+        float gray = 0.45f + ((i * 11) % 30) / 100.0f; // pequena variação no tom de cinza
+        glColor3f(gray, gray * 0.95f, gray * 0.90f);
+
+        glVertex3f(
+            asteroids[i].orbitRadius * cosf(a),
+            asteroids[i].y,
+            asteroids[i].orbitRadius * sinf(a)
+        );
+    }
+    glEnd();
+
+    glPointSize(1.0f);
+    glEnable(GL_LIGHTING); //ponto simples com iluminação fica estranho ou nem aparece do jeito esperado
 }
