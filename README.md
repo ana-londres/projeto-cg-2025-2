@@ -39,7 +39,7 @@ O projeto foi dividido em múltiplos arquivos para melhorar a organização e fa
 
 ## Imagem do programa
 
-Adicione aqui um print do programa rodando (ex: `assets/screenshot.png`)
+![Interface do Programa](./programa.png)
 
 ---
 
