@@ -35,8 +35,26 @@ O projeto foi dividido em múltiplos arquivos para melhorar a organização e fa
 * HUD: interface 2D sobre a cena
 * Main: funcionamento geral do projeto
 
----
+<br>
 
+| Arquivo | Função Geral |
+| :--- | :--- |
+| **include/stb_image.h** | Biblioteca externa *header-only* responsável pela decodificação de imagens (PNG/JPG). É a base para o carregamento de qualquer asset visual do projeto. |
+| **src/textures.c <br> include/textures.h** | Responsável pelo carregamento de todas as imagens de textura usando a `stb_image`. Gera os IDs de textura OpenGL e faz o upload dos pixels para a GPU. |
+| **src/render_utils.c <br> include/render_utils.h** | Centraliza funções auxiliares de renderização: configuração de materiais (Phong), ativação/limpeza de emissão própria, desenho de esferas texturizadas e órbitas. |
+| **src/obj_loader.c <br> include/obj_loader.h** | Implementa um *parser* de arquivos `.obj` para importar o modelo 3D da estação espacial. Lê vértices, normais e coordenadas de textura para montar a geometria. |
+| **src/planets.c <br> include/planets.h** | Define os dados orbitais e físicos de cada planeta (raio, velocidade, inclinação). Gerencia a renderização individual de astros, luas, anéis e o campo de asteroides. |
+| **src/station.c <br> include/station.h** | Gerencia a Estação Espacial Internacional (ISS): carrega o modelo via `obj_loader`, posiciona em órbita baixa ao redor da Terra e realiza sua rotação e translação. |
+| **src/comet.c <br> include/comet.h** | Simula o comportamento de um cometa com órbita elíptica. Controla o sistema de partículas da cauda, atualizando opacidade e tamanho conforme a proximidade ao Sol. |
+| **src/camera.c <br> include/camera.h** | Implementa os múltiplos modos de câmera (visão geral, presa a planetas, visão do Sol). Controla o posicionamento e orientação via `gluLookAt` pelo teclado. |
+| **src/hud.c <br> include/hud.h** | Renderiza a interface 2D sobreposta à cena 3D. Exibe o nome do modo de câmera ativo e legendas de controle, usando projeção ortográfica temporária. |
+| **src/main.c** | **Ponto de entrada da aplicação.** Inicializa o OpenGL/GLUT, configura as luzes (Sol e luz ambiente), registra os callbacks e controla a animação global do sistema. |
+
+<br>
+
+---
+  
+  
 ## Imagem do programa
 
 ![Interface do Programa](./programa.png)
