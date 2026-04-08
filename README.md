@@ -57,7 +57,11 @@ O projeto foi dividido em múltiplos arquivos para melhorar a organização e fa
 
 ## Imagem do programa
 
-![Interface do Programa](./programa.png)
+![Interface do Programa](./programa.png)  
+<br>
+
+Imagem do modo de órbita com foco na Terra
+![Órbita focada na Terra](./orbita.png)
 
 ---
 
