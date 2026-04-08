@@ -122,9 +122,7 @@ O modelo 3D da estação espacial foi obtido em:
 
 * A função `loadPNGTexture()` poderia verificar o número de canais retornado pela `stb_image` e escolher entre `GL_RGB` e `GL_RGBA` conforme o arquivo, resolvendo a distorção que ocorre em PNGs com transparência. Também seria útil gerar uma textura de fallback sólida por planeta caso o arquivo não seja encontrado, evitando que o objeto apareça com o material padrão branco sem nenhuma indicação visual do problema.
 
-* Os arrays estáticos de `obj_loader.c` poderiam ser substituídos por alocação dinâmica com `realloc()`, eliminando o truncamento silencioso para modelos grandes. Além disso, implementar o parsing de `mtllib` e `usemtl` permitiria associar materiais e texturas distintas por grupo do modelo, o que é essencial para exibir a ISS corretamente, já que atualmente ela recebe uma única `stationTexture` aplicada de forma uniforme sobre todo o modelo independentemente de suas seções.
-
-* Os pontos de controle da curva em `bezierCtrl[4][3]` são constantes fixas no código, e o vetor perpendicular da cauda `(-dz, 0, dx)` se degenera quando a tangente aponta quase verticalmente. Ambos os problemas poderiam ser resolvidos em conjunto: expondo os pontos de controle num arquivo de configuração externo para ajuste sem recompilação, e substituindo o vetor perpendicular no plano XZ por um frame de Frenet-Serret completo (tangente, normal e binormal), que garante orientação estável da cauda em qualquer direção do espaço 3D.
+* Os arrays estáticos de `obj_loader.c` poderiam ser substituídos por alocação dinâmica com `realloc()`, eliminando o truncamento silencioso para modelos grandes. Além disso, implementar o parsing de `mtllib` e `usemtl` permitiria associar materiais e texturas distintas por grupo do modelo, o que é essencial para exibir a Estação Espacial corretamente, já que atualmente ela recebe uma única `stationTexture` aplicada de forma uniforme sobre todo o modelo independentemente de suas seções.
 
 ---
 
